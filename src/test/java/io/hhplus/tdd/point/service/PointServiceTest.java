@@ -11,7 +11,9 @@ import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import io.hhplus.tdd.point.repository.UserPointRepositoryImpl;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +39,7 @@ public class PointServiceTest {
   /**
    * repository 메서드 실행을 위한 객체 생성
    */
-  @BeforeAll
+  @BeforeEach
   public void setUp() {
     PointHistoryRepository pointHistoryRepository = new PointHistoryRepositoryImpl(
       new PointHistoryTable()
@@ -79,6 +81,20 @@ public class PointServiceTest {
     UserPointResponse response = service.charge(USER_ID, amount);
     // then
     assertThat(response.point()).isEqualTo(1100L);
+  }
+
+  /**
+   * 포인트를 사용 할 경우 기존 저장되어있던 포인트에서 입력된 포인트만큼 감소됩니다.
+   */
+  @Test
+  @DisplayName("point는 감소된 값이여야 한다.")
+  void useTest_ok() {
+    // given
+    long amount = 100L;
+    // when
+    UserPointResponse response = service.use(USER_ID, amount);
+    // then
+    assertThat(response.point()).isEqualTo(900L);
   }
 
 
