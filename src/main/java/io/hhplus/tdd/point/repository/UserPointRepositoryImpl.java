@@ -25,7 +25,7 @@ public class UserPointRepositoryImpl implements UserPointRepository {
   public UserPoint charge(long id, long amount) {
     try {
       UserPoint chargedUserPoint = userPointTable.selectById(id)
-          .charge(amount);
+          .increase(amount);
 
       return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
     } catch (InterruptedException e) {
