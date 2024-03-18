@@ -5,11 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.domain.TransactionType;
+import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import io.hhplus.tdd.point.repository.UserPointRepositoryImpl;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -100,10 +103,10 @@ public class PointServiceTest {
    */
   @Test
   @DisplayName("사용자 id로 point 조회 테스트")
-  void findById_ok_savedUser() {
+  void userPointById_ok_savedUser() {
     // given
     // when
-    UserPointResponse response = service.findById(USER_ID);
+    UserPointResponse response = service.userPointById(USER_ID);
 
     // then
     assertThat(response.point()).isEqualTo(1000L);
@@ -114,14 +117,35 @@ public class PointServiceTest {
    */
   @Test
   @DisplayName("저장되어있지 않은 사용자 조회.")
-  void findById_ok_notSavedUser() {
+  void userPointById_ok_notSavedUser() {
     // given
     // when
-    UserPointResponse response = service.findById(2L);
+    UserPointResponse response = service.userPointById(2L);
 
     // then
     assertThat(response.point()).isEqualTo(0L);
   }
+
+  /**
+   * 특정 사용자의 포인트 저장/사용 내역을 정렬해서 보여준다(내림차순)
+   * id가 2인 사용자를 추가하지만 조회되지 않는다.
+   */
+  @Test
+  @DisplayName("특정 사용자의 포인트 내역 조회.")
+  void pointHistoriesById_ok() {
+    // given
+    service.use(USER_ID, 100L);
+    long userId2 = 2L;
+    service.charge(userId2, 1000L);
+    // when
+    List<PointHistoryResponse> responses = service.pointHistoriesById(USER_ID);
+
+    // then
+    assertThat(responses).hasSize(2);
+    assertThat(responses.get(0).type()).isEqualTo(TransactionType.USE);
+  }
+
+
 
 
 }

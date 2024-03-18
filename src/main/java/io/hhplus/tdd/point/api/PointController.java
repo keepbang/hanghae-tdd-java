@@ -1,11 +1,9 @@
 package io.hhplus.tdd.point.api;
 
-import io.hhplus.tdd.point.domain.PointHistory;
-import io.hhplus.tdd.point.domain.UserPoint;
 import io.hhplus.tdd.point.dto.AmountRequest;
+import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
 import io.hhplus.tdd.point.service.PointService;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,15 +28,15 @@ public class PointController {
      */
     @GetMapping("{id}")
     public ResponseEntity<UserPointResponse> point(@PathVariable Long id) {
-        return ResponseEntity.ok(pointService.findById(id));
+        return ResponseEntity.ok(pointService.userPointById(id));
     }
 
     /**
      * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
      */
     @GetMapping("{id}/histories")
-    public List<PointHistory> history(@PathVariable Long id) {
-        return Collections.emptyList();
+    public ResponseEntity<List<PointHistoryResponse>> history(@PathVariable Long id) {
+        return ResponseEntity.ok(pointService.pointHistoriesById(id));
     }
 
     /**

@@ -16,5 +16,5 @@ public interface UserPointRepository {
 
   UserPoint use(Long id, long amount);
 
-  UserPoint findById(long id);
+  UserPoint userPointById(long id);
 }

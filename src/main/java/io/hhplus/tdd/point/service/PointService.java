@@ -2,12 +2,15 @@ package io.hhplus.tdd.point.service;
 
 import io.hhplus.tdd.point.domain.TransactionType;
 import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -54,8 +57,8 @@ public class PointService {
     );
   }
 
-  public UserPointResponse findById(long id) {
-    UserPoint userPoint = userPointRepository.findById(id);
+  public UserPointResponse userPointById(long id) {
+    UserPoint userPoint = userPointRepository.userPointById(id);
 
     return convertUserPointResponse(userPoint);
   }
@@ -70,5 +73,24 @@ public class PointService {
             ), ZoneId.systemDefault()
         )
     );
+  }
+
+  public List<PointHistoryResponse> pointHistoriesById(long userId) {
+    return pointHistoryRepository.selectAllByUserId(userId)
+        .stream()
+        .map(history -> new PointHistoryResponse(
+            history.userId(),
+            history.type(),
+            history.amount(),
+            LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(
+                    history.timeMillis()
+                ), ZoneId.systemDefault()
+            )
+        ))
+        .sorted(Comparator
+            .comparing(PointHistoryResponse::dateTime)
+            .reversed())
+        .toList();
   }
 }

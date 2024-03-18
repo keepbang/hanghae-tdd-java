@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 /**
  * create on 3/17/24. create by IntelliJ IDEA.
  *
- * <p> Table 접근을 위한 Repository </p>
+ * <p> UserPointTable 접근을 위한 Repository </p>
  *
  * @author Gibyung Chae (Keepbang)
  * @version 1.0
@@ -46,7 +46,7 @@ public class UserPointRepositoryImpl implements UserPointRepository {
   }
 
   @Override
-  public UserPoint findById(long id) {
+  public UserPoint userPointById(long id) {
     try {
       return userPointTable.selectById(id);
     } catch (InterruptedException e) {
