@@ -34,15 +34,7 @@ public class PointService {
 
     insertPointHistory(id, amount, TransactionType.CHARGE, userPoint);
 
-    return new UserPointResponse(
-        userPoint.id(),
-        userPoint.point(),
-        LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(
-                userPoint.updateMillis()
-            ), ZoneId.systemDefault()
-        )
-    );
+    return convertUserPointResponse(userPoint);
   }
 
   public UserPointResponse use(Long id, long amount) {
@@ -50,15 +42,7 @@ public class PointService {
 
     insertPointHistory(id, amount, TransactionType.USE, userPoint);
 
-    return new UserPointResponse(
-        userPoint.id(),
-        userPoint.point(),
-        LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(
-                userPoint.updateMillis()
-            ), ZoneId.systemDefault()
-        )
-    );
+    return convertUserPointResponse(userPoint);
   }
 
   private void insertPointHistory(Long id, Long amount, TransactionType type, UserPoint userPoint) {
@@ -70,4 +54,21 @@ public class PointService {
     );
   }
 
+  public UserPointResponse findById(long id) {
+    UserPoint userPoint = userPointRepository.findById(id);
+
+    return convertUserPointResponse(userPoint);
+  }
+
+  private UserPointResponse convertUserPointResponse(UserPoint userPoint) {
+    return new UserPointResponse(
+        userPoint.id(),
+        userPoint.point(),
+        LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(
+                userPoint.updateMillis()
+            ), ZoneId.systemDefault()
+        )
+    );
+  }
 }

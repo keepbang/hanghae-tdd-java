@@ -10,10 +10,8 @@ import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import io.hhplus.tdd.point.repository.UserPointRepositoryImpl;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -95,6 +93,34 @@ public class PointServiceTest {
     UserPointResponse response = service.use(USER_ID, amount);
     // then
     assertThat(response.point()).isEqualTo(900L);
+  }
+
+  /**
+   * 저장되어있는 사용자의 포인트가 조회된다.
+   */
+  @Test
+  @DisplayName("사용자 id로 point 조회 테스트")
+  void findById_ok_savedUser() {
+    // given
+    // when
+    UserPointResponse response = service.findById(USER_ID);
+
+    // then
+    assertThat(response.point()).isEqualTo(1000L);
+  }
+
+  /**
+   * 저장되어있지 않은 사용자는 0 point 가 조회된다.
+   */
+  @Test
+  @DisplayName("저장되어있지 않은 사용자 조회.")
+  void findById_ok_notSavedUser() {
+    // given
+    // when
+    UserPointResponse response = service.findById(2L);
+
+    // then
+    assertThat(response.point()).isEqualTo(0L);
   }
 
 

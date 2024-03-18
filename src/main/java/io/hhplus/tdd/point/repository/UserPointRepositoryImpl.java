@@ -45,4 +45,13 @@ public class UserPointRepositoryImpl implements UserPointRepository {
     }
   }
 
+  @Override
+  public UserPoint findById(long id) {
+    try {
+      return userPointTable.selectById(id);
+    } catch (InterruptedException e) {
+      throw new DatabaseException();
+    }
+  }
+
 }

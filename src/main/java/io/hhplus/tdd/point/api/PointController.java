@@ -5,13 +5,17 @@ import io.hhplus.tdd.point.domain.UserPoint;
 import io.hhplus.tdd.point.dto.AmountRequest;
 import io.hhplus.tdd.point.dto.UserPointResponse;
 import io.hhplus.tdd.point.service.PointService;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RequestMapping("/point")
@@ -25,8 +29,8 @@ public class PointController {
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
      */
     @GetMapping("{id}")
-    public UserPoint point(@PathVariable Long id) {
-        return new UserPoint(0L, 0L, 0L);
+    public ResponseEntity<UserPointResponse> point(@PathVariable Long id) {
+        return ResponseEntity.ok(pointService.findById(id));
     }
 
     /**

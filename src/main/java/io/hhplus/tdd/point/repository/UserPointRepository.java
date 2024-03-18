@@ -15,4 +15,6 @@ public interface UserPointRepository {
   UserPoint charge(long id, long amount);
 
   UserPoint use(Long id, long amount);
+
+  UserPoint findById(long id);
 }
