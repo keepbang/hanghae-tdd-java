@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
-import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.dto.UserPointResponse;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
@@ -31,8 +31,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class PointServiceTest {
 
   private PointService service;
-  private PointHistoryRepository pointHistoryRepository;
-  private UserPointRepository userPointRepository;
 
   private static final long USER_ID = 1;
 
@@ -41,10 +39,10 @@ public class PointServiceTest {
    */
   @BeforeAll
   public void setUp() {
-    pointHistoryRepository = new PointHistoryRepositoryImpl(
+    PointHistoryRepository pointHistoryRepository = new PointHistoryRepositoryImpl(
       new PointHistoryTable()
     );
-    userPointRepository = new UserPointRepositoryImpl(
+    UserPointRepository userPointRepository = new UserPointRepositoryImpl(
       new UserPointTable()
     );
 
@@ -78,9 +76,9 @@ public class PointServiceTest {
     // given
     long amount = 100L;
     // when
-    UserPoint userPoint = service.charge(USER_ID, amount);
+    UserPointResponse response = service.charge(USER_ID, amount);
     // then
-    assertThat(userPoint.point()).isEqualTo(1100L);
+    assertThat(response.point()).isEqualTo(1100L);
   }
 
 

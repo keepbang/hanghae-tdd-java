@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 /**
- * create on 3/17/24.
- * create by IntelliJ IDEA.
+ * create on 3/17/24. create by IntelliJ IDEA.
  *
  * <p> 클래스 설명 </p>
  *
@@ -25,11 +24,10 @@ public class UserPointRepositoryImpl implements UserPointRepository {
   @Override
   public UserPoint charge(long id, long amount) {
     try {
-      UserPoint userPoint = userPointTable.selectById(id);
+      UserPoint chargedUserPoint = userPointTable.selectById(id)
+          .charge(amount);
 
-      long updatePoint = userPoint.point() + amount;
-
-      return userPointTable.insertOrUpdate(id, updatePoint);
+      return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
     } catch (InterruptedException e) {
       throw new DatabaseException();
     }

@@ -4,7 +4,7 @@ package io.hhplus.tdd.common.exception;
  * create on 3/17/24.
  * create by IntelliJ IDEA.
  *
- * <p> 클래스 설명 </p>
+ * <p> Database 처리중에 발생하는 Exception </p>
  *
  * @author Gibyung Chae (Keepbang)
  * @version 1.0
