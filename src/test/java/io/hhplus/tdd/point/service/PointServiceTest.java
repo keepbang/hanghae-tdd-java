@@ -1,15 +1,18 @@
 package io.hhplus.tdd.point.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.domain.UserPoint;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import io.hhplus.tdd.point.repository.UserPointRepositoryImpl;
-import java.security.InvalidParameterException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -61,17 +64,24 @@ public class PointServiceTest {
     0, -1
   })
   @DisplayName("0이나 음수가 들어올 경우 exception이 발생한다.")
-  void invalidInputAmount(long amount) {
-    // given
-    // when
-    // then
-    Assertions.assertThatThrownBy(() -> service.charge(USER_ID, amount))
+  void chargeTest_fail_invalidInputAmount(long amount) {
+    assertThatThrownBy(() -> service.charge(USER_ID, amount))
       .isInstanceOf(IllegalArgumentException.class);
   }
 
   /**
-   * 포인트를 충전 할 경우 기존 저장되어있던 포인트에
+   * 포인트를 충전 할 경우 기존 저장되어있던 포인트에서 입력된 포인트만큼 증가됩니다.
    */
+  @Test
+  @DisplayName("point는 증가된 값이여야 한다.")
+  void chargeTest_ok() {
+    // given
+    long amount = 100L;
+    // when
+    UserPoint userPoint = service.charge(USER_ID, amount);
+    // then
+    assertThat(userPoint.point()).isEqualTo(1100L);
+  }
 
 
 }
