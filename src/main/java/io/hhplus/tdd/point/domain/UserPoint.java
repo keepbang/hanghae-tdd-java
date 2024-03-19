@@ -17,8 +17,8 @@ public record UserPoint(
     amountValidation(amount);
     balanceCheck(amount);
 
-    long chargedPoint = this.point - amount;
-    return new UserPoint(this.id, chargedPoint, this.updateMillis);
+    long balance = this.point - amount;
+    return new UserPoint(this.id, balance, this.updateMillis);
   }
 
   /**
