@@ -1,6 +1,5 @@
 package io.hhplus.tdd.point.repository;
 
-import io.hhplus.tdd.common.exception.DatabaseException;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.domain.UserPoint;
 import lombok.RequiredArgsConstructor;
@@ -23,35 +22,23 @@ public class UserPointRepositoryImpl implements UserPointRepository {
 
   @Override
   public UserPoint charge(long id, long amount) {
-    try {
-      UserPoint chargedUserPoint = userPointTable.selectById(id)
-          .increase(amount);
+    UserPoint chargedUserPoint = userPointTable.selectById(id)
+        .increase(amount);
 
-      return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
-    } catch (InterruptedException e) {
-      throw new DatabaseException();
-    }
+    return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
   }
 
   @Override
   public UserPoint use(Long id, long amount) {
-    try {
-      UserPoint chargedUserPoint = userPointTable.selectById(id)
-          .decrease(amount);
+    UserPoint chargedUserPoint = userPointTable.selectById(id)
+        .decrease(amount);
 
-      return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
-    } catch (InterruptedException e) {
-      throw new DatabaseException();
-    }
+    return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
   }
 
   @Override
   public UserPoint userPointById(long id) {
-    try {
-      return userPointTable.selectById(id);
-    } catch (InterruptedException e) {
-      throw new DatabaseException();
-    }
+    return userPointTable.selectById(id);
   }
 
 }

@@ -1,6 +1,5 @@
 package io.hhplus.tdd.point.repository;
 
-import io.hhplus.tdd.common.exception.DatabaseException;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.point.domain.PointHistory;
 import io.hhplus.tdd.point.domain.TransactionType;
@@ -26,11 +25,7 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
   @Override
   public PointHistory save(Long id, Long amount, TransactionType transactionType,
       Long updateMillis) {
-    try {
-      return pointHistoryTable.insert(id, amount, transactionType, updateMillis);
-    } catch (InterruptedException e) {
-      throw new DatabaseException();
-    }
+    return pointHistoryTable.insert(id, amount, transactionType, updateMillis);
   }
 
   @Override

@@ -1,6 +1,5 @@
 package io.hhplus.tdd.point.api;
 
-import io.hhplus.tdd.point.dto.AmountRequest;
 import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
 import io.hhplus.tdd.point.service.PointService;
@@ -43,15 +42,15 @@ public class PointController {
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/charge")
-    public ResponseEntity<UserPointResponse> charge(@PathVariable Long id, @RequestBody AmountRequest request) {
-        return ResponseEntity.ok(pointService.charge(id, request.amount()));
+    public ResponseEntity<UserPointResponse> charge(@PathVariable Long id, @RequestBody long amount) {
+        return ResponseEntity.ok(pointService.charge(id, amount));
     }
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/use")
-    public ResponseEntity<UserPointResponse> use(@PathVariable Long id, @RequestBody AmountRequest request) {
-        return ResponseEntity.ok(pointService.use(id, request.amount()));
+    public ResponseEntity<UserPointResponse> use(@PathVariable Long id, @RequestBody long amount) {
+        return ResponseEntity.ok(pointService.use(id, amount));
     }
 }
