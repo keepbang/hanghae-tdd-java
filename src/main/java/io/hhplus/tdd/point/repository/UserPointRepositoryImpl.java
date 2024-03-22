@@ -21,19 +21,13 @@ public class UserPointRepositoryImpl implements UserPointRepository {
   private final UserPointTable userPointTable;
 
   @Override
-  public UserPoint charge(long id, long amount) {
-    UserPoint chargedUserPoint = userPointTable.selectById(id)
-        .increase(amount);
-
-    return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
+  public UserPoint charge(long id, long point) {
+    return userPointTable.insertOrUpdate(id, point);
   }
 
   @Override
-  public UserPoint use(Long id, long amount) {
-    UserPoint chargedUserPoint = userPointTable.selectById(id)
-        .decrease(amount);
-
-    return userPointTable.insertOrUpdate(id, chargedUserPoint.point());
+  public UserPoint use(Long id, long point) {
+    return userPointTable.insertOrUpdate(id, point);
   }
 
   @Override

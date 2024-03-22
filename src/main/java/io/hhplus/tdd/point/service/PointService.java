@@ -4,6 +4,7 @@ import io.hhplus.tdd.point.domain.TransactionType;
 import io.hhplus.tdd.point.domain.UserPoint;
 import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
+import io.hhplus.tdd.point.handler.LockHandler;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import java.time.Instant;
@@ -29,23 +30,37 @@ public class PointService {
 
   private final UserPointRepository userPointRepository;
   private final PointHistoryRepository pointHistoryRepository;
+  private final LockHandler lockHandler;
 
-  // TODO: 순차적 처리를 위한 로직 구현을 위해
-  //        charge 메소드에서 table에 Insert 하지 않고 point가 변경된 userPoint를 return
+
   public UserPointResponse charge(Long id, Long amount) {
-    UserPoint userPoint = userPointRepository.charge(id, amount);
+    try {
+      lockHandler.userLock(id);
+      UserPoint chargedUserPoint = userPointRepository.userPointById(id)
+          .increase(amount);
 
-    insertPointHistory(id, amount, TransactionType.CHARGE, userPoint);
-
-    return convertUserPointResponse(userPoint);
+      UserPoint userPoint = userPointRepository.charge(id, chargedUserPoint.point());
+      insertPointHistory(id, amount, TransactionType.CHARGE, userPoint);
+      return convertUserPointResponse(userPoint);
+    } finally {
+      lockHandler.userUnLock(id);
+    }
   }
 
   public UserPointResponse use(Long id, long amount) {
-    UserPoint userPoint = userPointRepository.use(id, amount);
 
-    insertPointHistory(id, amount, TransactionType.USE, userPoint);
+    try {
+      lockHandler.userLock(id);
 
-    return convertUserPointResponse(userPoint);
+      UserPoint usedPoint = userPointRepository.userPointById(id)
+          .decrease(amount);
+      UserPoint userPoint = userPointRepository.use(id, usedPoint.point());
+
+      insertPointHistory(id, amount, TransactionType.USE, userPoint);
+      return convertUserPointResponse(userPoint);
+    } finally {
+      lockHandler.userUnLock(id);
+    }
   }
 
   private void insertPointHistory(Long id, Long amount, TransactionType type, UserPoint userPoint) {

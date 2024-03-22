@@ -8,11 +8,14 @@ import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.domain.TransactionType;
 import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
+import io.hhplus.tdd.point.handler.LockHandler;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import io.hhplus.tdd.point.repository.UserPointRepositoryImpl;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,15 +46,17 @@ public class PointServiceTest {
   @BeforeEach
   public void setUp() {
     PointHistoryRepository pointHistoryRepository = new PointHistoryRepositoryImpl(
-      new PointHistoryTable()
+        new PointHistoryTable()
     );
+
     UserPointRepository userPointRepository = new UserPointRepositoryImpl(
-      new UserPointTable()
+        new UserPointTable()
     );
 
     service = new PointService(
-      userPointRepository,
-      pointHistoryRepository
+        userPointRepository,
+        pointHistoryRepository,
+        new LockHandler()
     );
 
     service.charge(USER_ID, 1000L);
@@ -62,12 +67,12 @@ public class PointServiceTest {
    */
   @ParameterizedTest
   @ValueSource(longs = {
-    0, -1
+      0, -1
   })
   @DisplayName("0이나 음수가 들어올 경우 exception이 발생한다.")
   void chargeTest_fail_invalidInputAmount(long amount) {
     assertThatThrownBy(() -> service.charge(USER_ID, amount))
-      .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   /**
@@ -145,7 +150,38 @@ public class PointServiceTest {
     assertThat(responses.get(0).type()).isEqualTo(TransactionType.USE);
   }
 
+  /**
+   * 충전/이용을 여러번 했을 경우 결과는 호출한 순서대로 처리된다.
+   */
+  @Test
+  @DisplayName("호출한 순서대로 처리되는지 확인")
+  void chargeAndUse_sequence_ok() throws InterruptedException {
+    // given
+    ExecutorService executorService = Executors.newFixedThreadPool(10);
+    // when
+    executorService.submit(() -> {
+      service.use(USER_ID, 900L); // -900
+    });
 
+    executorService.submit(() -> {
+      service.charge(USER_ID, 100L); // + 100
+
+    });
+
+    executorService.submit(() -> {
+      service.use(USER_ID, 100L); // -100
+    });
+
+
+    Thread.sleep(1000L);
+
+    // then
+
+    Long expected = 1000L - 900L + 100 - 100;
+
+    assertThat(service.userPointById(USER_ID).point())
+        .isEqualTo(expected);
+  }
 
 
 }
