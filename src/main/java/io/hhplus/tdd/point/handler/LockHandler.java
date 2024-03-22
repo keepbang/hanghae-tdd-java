@@ -30,7 +30,7 @@ public class LockHandler {
     while(lock.isLocked()) {
       lock = map.get(id);
 
-      if (time.isAfter(LocalTime.now())) {
+      if (time.isBefore(LocalTime.now())) {
         throw new CustomLockException("포인트가 사용되지 않았습니다.");
       }
     }

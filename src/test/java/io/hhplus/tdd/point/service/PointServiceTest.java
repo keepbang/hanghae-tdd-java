@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -33,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @version 1.0
  * @since 1.0
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PointServiceTest {
 
   private PointService service;
@@ -56,8 +54,7 @@ public class PointServiceTest {
     service = new PointService(
         userPointRepository,
         pointHistoryRepository,
-        new LockHandler()
-    );
+        new LockHandler());
 
     service.charge(USER_ID, 1000L);
   }
@@ -159,25 +156,34 @@ public class PointServiceTest {
     // given
     ExecutorService executorService = Executors.newFixedThreadPool(10);
     // when
-    executorService.submit(() -> {
+    executorService.execute(() -> {
       service.use(USER_ID, 900L); // -900
     });
 
-    executorService.submit(() -> {
+    Thread.sleep(100L);
+
+    executorService.execute(() -> {
       service.charge(USER_ID, 100L); // + 100
 
     });
 
-    executorService.submit(() -> {
-      service.use(USER_ID, 100L); // -100
-    });
+    Thread.sleep(100L);
 
+    executorService.execute(() -> {
+      service.use(USER_ID, 200L); // -200
+    });
 
     Thread.sleep(1000L);
 
     // then
+    Long expected = 1000L - 900L + 100 - 200;
 
-    Long expected = 1000L - 900L + 100 - 100;
+    List<Long> points = service.pointHistoriesById(USER_ID)
+        .stream()
+        .map(PointHistoryResponse::amount)
+        .toList();
+
+    assertThat(points).containsExactly(200L, 100L, 900L, 1000L);
 
     assertThat(service.userPointById(USER_ID).point())
         .isEqualTo(expected);

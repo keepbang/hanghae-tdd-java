@@ -32,7 +32,6 @@ public class PointService {
   private final PointHistoryRepository pointHistoryRepository;
   private final LockHandler lockHandler;
 
-
   public UserPointResponse charge(Long id, Long amount) {
     try {
       lockHandler.userLock(id);
@@ -40,7 +39,7 @@ public class PointService {
           .increase(amount);
 
       UserPoint userPoint = userPointRepository.charge(id, chargedUserPoint.point());
-      insertPointHistory(id, amount, TransactionType.CHARGE, userPoint);
+      insertPointHistory(id, amount, TransactionType.CHARGE, userPoint.updateMillis());
       return convertUserPointResponse(userPoint);
     } finally {
       lockHandler.userUnLock(id);
@@ -56,19 +55,19 @@ public class PointService {
           .decrease(amount);
       UserPoint userPoint = userPointRepository.use(id, usedPoint.point());
 
-      insertPointHistory(id, amount, TransactionType.USE, userPoint);
+      insertPointHistory(id, amount, TransactionType.USE, userPoint.updateMillis());
       return convertUserPointResponse(userPoint);
     } finally {
       lockHandler.userUnLock(id);
     }
   }
 
-  private void insertPointHistory(Long id, Long amount, TransactionType type, UserPoint userPoint) {
+  private void insertPointHistory(Long id, Long amount, TransactionType type, Long millis) {
     pointHistoryRepository.save(
         id,
         amount,
         type,
-        userPoint.updateMillis()
+        millis
     );
   }
 
