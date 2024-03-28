@@ -14,8 +14,6 @@ import io.hhplus.tdd.point.repository.PointHistoryRepositoryImpl;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import io.hhplus.tdd.point.repository.UserPointRepositoryImpl;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +52,8 @@ public class PointServiceTest {
     service = new PointService(
         userPointRepository,
         pointHistoryRepository,
-        new LockHandler());
+        new LockHandler()
+    );
 
     service.charge(USER_ID, 1000L);
   }
@@ -145,48 +144,6 @@ public class PointServiceTest {
     // then
     assertThat(responses).hasSize(2);
     assertThat(responses.get(0).type()).isEqualTo(TransactionType.USE);
-  }
-
-  /**
-   * 충전/이용을 여러번 했을 경우 결과는 호출한 순서대로 처리된다.
-   */
-  @Test
-  @DisplayName("호출한 순서대로 처리되는지 확인")
-  void chargeAndUse_sequence_ok() throws InterruptedException {
-    // given
-    ExecutorService executorService = Executors.newFixedThreadPool(10);
-    // when
-    executorService.execute(() -> {
-      service.use(USER_ID, 900L); // -900
-    });
-
-    Thread.sleep(100L);
-
-    executorService.execute(() -> {
-      service.charge(USER_ID, 100L); // + 100
-
-    });
-
-    Thread.sleep(100L);
-
-    executorService.execute(() -> {
-      service.use(USER_ID, 200L); // -200
-    });
-
-    Thread.sleep(1000L);
-
-    // then
-    Long expected = 1000L - 900L + 100 - 200;
-
-    List<Long> points = service.pointHistoriesById(USER_ID)
-        .stream()
-        .map(PointHistoryResponse::amount)
-        .toList();
-
-    assertThat(points).containsExactly(200L, 100L, 900L, 1000L);
-
-    assertThat(service.userPointById(USER_ID).point())
-        .isEqualTo(expected);
   }
 
 

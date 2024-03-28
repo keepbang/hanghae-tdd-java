@@ -49,8 +49,8 @@ class LockHandlerTest {
   void userUnLockTest_ok()  {
     // given
     Long userId = 1L;
-    handler.userLock(userId); // lock 획득
-    handler.userUnLock(userId); // 같은 아이디로 lock 획득
+    boolean isLocked = handler.userLock(userId);// lock 획득
+    handler.userUnLock(userId, isLocked); // 같은 아이디로 lock 획득
     // when
     boolean isLock = handler.isLocked(userId);
 

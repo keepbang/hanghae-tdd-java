@@ -3,6 +3,8 @@ package io.hhplus.tdd.point.handler;
 import io.hhplus.tdd.point.exception.CustomLockException;
 import java.time.LocalTime;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.stereotype.Component;
 
@@ -19,35 +21,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class LockHandler {
 
-  private final ConcurrentHashMap<Long, ReentrantLock> map = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Long, Lock> map = new ConcurrentHashMap<>();
 
-  private static final long TIME_OUT_SECONDS = 3;
-
-  public void userLock(Long id) {
-    ReentrantLock lock = map.getOrDefault(id, new ReentrantLock());
-    LocalTime time = LocalTime.now().plusSeconds(TIME_OUT_SECONDS);
-
-    while(lock.isLocked()) {
-      lock = map.get(id);
-
-      if (time.isBefore(LocalTime.now())) {
-        throw new CustomLockException("포인트가 사용되지 않았습니다.");
-      }
+  public boolean userLock(Long id) {
+    Lock lock = map.getOrDefault(id, new ReentrantLock(true));
+    boolean isLocked = false;
+    try {
+      isLocked = lock.tryLock(5, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      throw new CustomLockException("포인트 작업이 오래 걸립니다. 잠시후 다시 시도해 주세요.");
     }
-    lock.lock();
+
     map.put(id, lock);
+
+    return isLocked;
   }
 
-  public void userUnLock(Long id) {
-    ReentrantLock lock = map.getOrDefault(id, new ReentrantLock());
+  public void userUnLock(Long id, boolean isLocked) {
+    Lock lock = map.get(id);
 
-    if (lock.isLocked()) {
+    if (lock != null && isLocked) {
       lock.unlock();
+      map.put(id, lock);
     }
   }
 
   public boolean isLocked(Long id) {
-    return map.getOrDefault(id, new ReentrantLock())
+    return ((ReentrantLock) map.getOrDefault(id, new ReentrantLock()))
         .isLocked();
   }
 }

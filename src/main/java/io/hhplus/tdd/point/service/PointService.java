@@ -4,6 +4,7 @@ import io.hhplus.tdd.point.domain.TransactionType;
 import io.hhplus.tdd.point.domain.UserPoint;
 import io.hhplus.tdd.point.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.dto.UserPointResponse;
+import io.hhplus.tdd.point.exception.CustomLockException;
 import io.hhplus.tdd.point.handler.LockHandler;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.UserPointRepository;
@@ -33,8 +34,14 @@ public class PointService {
   private final LockHandler lockHandler;
 
   public UserPointResponse charge(Long id, Long amount) {
+    boolean isLocked = false;
     try {
-      lockHandler.userLock(id);
+      isLocked = lockHandler.userLock(id);
+
+      if (!isLocked) {
+        throw new CustomLockException("포인트가 충전되지 않았습니다.");
+      }
+
       UserPoint chargedUserPoint = userPointRepository.userPointById(id)
           .increase(amount);
 
@@ -42,14 +49,18 @@ public class PointService {
       insertPointHistory(id, amount, TransactionType.CHARGE, userPoint.updateMillis());
       return convertUserPointResponse(userPoint);
     } finally {
-      lockHandler.userUnLock(id);
+      lockHandler.userUnLock(id, isLocked);
     }
   }
 
   public UserPointResponse use(Long id, long amount) {
-
+    boolean isLocked = false;
     try {
-      lockHandler.userLock(id);
+      isLocked = lockHandler.userLock(id);
+
+      if (!isLocked) {
+        throw new CustomLockException("포인트가 사용되지 않았습니다.");
+      }
 
       UserPoint usedPoint = userPointRepository.userPointById(id)
           .decrease(amount);
@@ -58,7 +69,7 @@ public class PointService {
       insertPointHistory(id, amount, TransactionType.USE, userPoint.updateMillis());
       return convertUserPointResponse(userPoint);
     } finally {
-      lockHandler.userUnLock(id);
+      lockHandler.userUnLock(id, isLocked);
     }
   }
 
