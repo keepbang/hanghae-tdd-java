@@ -1,5 +1,5 @@
-# [항해+ 과제] TDD 로 개발하기
-
+# [항해플러스 과제] TDD 로 개발하기
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/keepbang/hanghae-tdd-java)](https://hits.seeyoufarm.com)
 
 ## 과제 요구사항
 - PATCH  `/point/{id}/charge` : 포인트를 충전한다.
